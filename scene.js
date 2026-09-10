@@ -1,15 +1,15 @@
-import {avatarConfig,disposeAvatar} from './profile-view.js';
-import {aimFeedback} from './precision.js';
-import {diveWeight} from './dive.js';
-import {applyContact,upcomingContact,markerWorld,CONTACT_HEIGHT,applyOrbit,poseLocomotion} from './contact.js';
-import * as T from './vendor/three.module.js';
-import {clamp,launchVelocity,landingAt} from './physics.js';
-import {makeHuman} from './avatar.js';
-import {followAngles,angleDelta} from './camera.js';
-import {relaxArms,prepareChest,poseContact,poseKneeSave,poseJump} from './motion.js';
-import {createOcean,volleyballMaterial} from './surfaces.js';
-import {createBeachLife,updateBeachLife,nearestCircle,roamBlockers} from './crowd.js';
-import {resetRoam} from './roam.js';
+import {avatarConfig,disposeAvatar} from './profile-view.js?v=v2';
+import {aimFeedback} from './precision.js?v=v2';
+import {diveWeight} from './dive.js?v=v2';
+import {applyContact,upcomingContact,markerWorld,CONTACT_HEIGHT,applyOrbit,poseLocomotion} from './contact.js?v=v2';
+import * as T from './vendor/three.module.js?v=v2';
+import {clamp,launchVelocity,landingAt} from './physics.js?v=v2';
+import {makeHuman} from './avatar.js?v=v2';
+import {followAngles,angleDelta} from './camera.js?v=v2';
+import {relaxArms,prepareChest,poseContact,poseKneeSave,poseJump} from './motion.js?v=v2';
+import {createOcean,volleyballMaterial} from './surfaces.js?v=v2';
+import {createBeachLife,updateBeachLife,nearestCircle,roamBlockers} from './crowd.js?v=v2';
+import {resetRoam} from './roam.js?v=v2';
 const Y=new T.Vector3(0,1,0);
 const material=(c,r=.85)=>new T.MeshStandardMaterial({color:c,roughness:r});
 function mesh(parent,geo,mat,x=0,y=0,z=0){const m=new T.Mesh(geo,mat);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m;}

@@ -42,5 +42,5 @@ export function attachTrickBubble({button,game,blocked,onUse,host=window,doc=doc
  button.onclick=e=>{if(e.detail===0){if(bubble.hidden)open();else close();}};
  return {refresh,close,get active(){return pointer!==null||!bubble.hidden;}};
 }
-import {EXERCISES} from './data.js';
+import {EXERCISES} from './data.js?v=v2';
 const names=Object.fromEntries(EXERCISES.map(e=>[e.id,e.name]));

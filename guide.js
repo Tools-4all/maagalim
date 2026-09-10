@@ -1,4 +1,4 @@
-import {PRACTICE} from './controls.js';
+import {PRACTICE} from './controls.js?v=v2';
 export const LESSON_ORDER=['foot','knee','inside','outside','chest','head','around','heel','shoulder','alternate','cross','lunge','scorpion','hip','rabona','side-lunge','around-reverse','foot-stall','head-side','knee-save'];
 export const LESSONS={
  'around-reverse':{gesture:'tap',steps:['בחר מסביב לעולם הפוך וחכה לכדור נמוך.','גע פעם אחת. הרגל מקיפה את הכדור בכיוון ההפוך בזמן שהוא עולה ויורד.','הישאר קרוב. רק המגע השני, אחרי מעגל מלא, משלים את התרגיל ושולח לחבר.']},

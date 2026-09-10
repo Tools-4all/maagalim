@@ -1,4 +1,4 @@
-import {thumbResponse} from './precision.js';
+import {thumbResponse} from './precision.js?v=v2';
 // Pointer ownership belongs to one thumb. Other fingers may jump or hit freely.
 export function movementInCamera(vector, startYaw, currentYaw) {
   const angle=startYaw-currentYaw,c=Math.cos(angle),s=Math.sin(angle);

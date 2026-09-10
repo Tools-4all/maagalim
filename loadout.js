@@ -1,4 +1,4 @@
-import {availableTricks} from './context-tricks.js';
+import {availableTricks} from './context-tricks.js?v=v2';
 export const GROUPS={low:{name:'נמוך · רגליים',moves:['around','around-reverse','foot-stall','inside','outside','rabona','heel','cross','side-lunge','lunge','knee-save','foot']},middle:{name:'אמצע · מותן וחזה',moves:['hip','chest','knee','alternate','shoulder']},high:{name:'גבוה · ראש ומעל הגוף',moves:['head','head-side','scorpion']}};
 export const DEFAULT_PROFILE={name:'השחקן שלי',nickname:'',style:'male',skin:'#fff9ef',outfit:'shorts',outfitColor:'#ee7853',ball:'classic',slots:{low:['around','inside','foot-stall'],middle:['hip','chest','knee'],high:['head','head-side','scorpion']}};
 export function normalizeProfile(value){

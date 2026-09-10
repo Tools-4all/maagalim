@@ -1,7 +1,7 @@
-import * as T from './vendor/three.module.js';
-import {makeHuman} from './avatar.js';
-import {relaxArms} from './motion.js';
-import {angleDelta} from './camera.js';
+import * as T from './vendor/three.module.js?v=v2';
+import {makeHuman} from './avatar.js?v=v2';
+import {relaxArms} from './motion.js?v=v2';
+import {angleDelta} from './camera.js?v=v2';
 
 // חיי החוף: מעגלי כדור נוספים ואנשי רקע.
 //

@@ -1,7 +1,7 @@
-import * as T from './vendor/three.module.js';
-import {makeHuman} from './avatar.js';
-import {relaxArms} from './motion.js';
-import {volleyballMaterial} from './surfaces.js';
+import * as T from './vendor/three.module.js?v=v2';
+import {makeHuman} from './avatar.js?v=v2';
+import {relaxArms} from './motion.js?v=v2';
+import {volleyballMaterial} from './surfaces.js?v=v2';
 export function avatarConfig(profile,viewModel=false){return {x:0,z:0,style:profile.style,skin:0xc5906c,skinTint:profile.skin,color:profile.outfitColor,outfit:profile.outfit,viewModel};}
 export function disposeAvatar(person){const geometries=new Set(),materials=new Set();person.root.traverse(o=>{if(o.geometry)geometries.add(o.geometry);if(o.material)for(const m of Array.isArray(o.material)?o.material:[o.material])materials.add(m);if(o.isSkinnedMesh)o.skeleton?.dispose();});geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());person.root.removeFromParent();}
 export function profilePreview(canvas){

@@ -1,4 +1,4 @@
-import * as T from './vendor/three.module.js';
+import * as T from './vendor/three.module.js?v=v2';
 let humanData;const skinMaps={};
 export async function loadHuman(){
  const response=await fetch(new URL('./assets/human.json',import.meta.url));if(!response.ok)throw new Error('Human mesh failed to load');humanData=await response.json();

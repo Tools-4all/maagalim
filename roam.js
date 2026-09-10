@@ -1,4 +1,4 @@
-import {angleDelta} from './camera.js';
+import {angleDelta} from './camera.js?v=v2';
 
 // מצב טיול חופשי בחוף.
 //

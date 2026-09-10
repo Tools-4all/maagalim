@@ -1,6 +1,6 @@
 // The same impact snapshot drives the displayed body and the ball's outgoing flight.
-import * as T from './vendor/three.module.js';
-import {poseContact,relaxArms} from './motion.js';
+import * as T from './vendor/three.module.js?v=v2';
+import {poseContact,relaxArms} from './motion.js?v=v2';
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 export const CONTACT_HEIGHT={foot:.62,knee:1.05,head:1.91,chest:1.43,inside:.60,outside:.60,around:.58,heel:.62,shoulder:1.62,alternate:1.05,cross:.60,lunge:.48,scorpion:1.32,hip:1.02,rabona:.48,'side-lunge':.48,'around-reverse':.58,'foot-stall':.58,'head-side':1.89,'knee-save':.40};
 export function bodyReach(id,ball,actor){

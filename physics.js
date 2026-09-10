@@ -1,7 +1,7 @@
-import {beginDive,advanceDive} from './dive.js';
-import {CONTACT_HEIGHT,impactSnapshot,bodyReach,impactSide} from './contact.js';
-import {EXERCISES,BALLS,LEVELS} from './data.js';
-import {updateOpponents,tryOpponentContact} from './opponents.js';
+import {beginDive,advanceDive} from './dive.js?v=v2';
+import {CONTACT_HEIGHT,impactSnapshot,bodyReach,impactSide} from './contact.js?v=v2';
+import {EXERCISES,BALLS,LEVELS} from './data.js?v=v2';
+import {updateOpponents,tryOpponentContact} from './opponents.js?v=v2';
 export const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 export const distance=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
 export function launchVelocity(from,to,t,g=9.81){return{x:(to.x-from.x)/t,y:(to.y-from.y+.5*g*t*t)/t,z:(to.z-from.z)/t};}

@@ -1,5 +1,5 @@
-import {beginDive,advanceDive} from './dive.js';
-import {bodyReach} from './contact.js';
+import {beginDive,advanceDive} from './dive.js?v=v2';
+import {bodyReach} from './contact.js?v=v2';
 // Continuous interception and support positions; no scripted teleport to the ball.
 const gap=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
 const limit=(v,a,b)=>Math.max(a,Math.min(b,v));

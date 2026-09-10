@@ -1,4 +1,4 @@
-import * as T from './vendor/three.module.js';
+import * as T from './vendor/three.module.js?v=v2';
 // Analytic wave normals keep reflections stable without another render pass.
 export function createOcean(){
  const mat=new T.ShaderMaterial({uniforms:{time:{value:0},horizon:{value:new T.Color(0x7ba4c6)}},vertexShader:`
