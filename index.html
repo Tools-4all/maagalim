@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="אטלנטה">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./assets/app-icon.png">
+  <meta name="theme-color" content="#082d3b">
+  <meta name="description" content="אטלנטה — משחק הקפצות בחוף בגוף ראשון. מסירה בנגיעה, הרמה בחזה ותרגילי רגליים במעגל של ארבעה.">
+  <title>אטלנטה · Beach Club</title>
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./controls.css">
+  <link rel="stylesheet" href="./guide.css">
+  <link rel="stylesheet" href="./comfort.css?v=13">
+  <link rel="icon" href="data:,">
+</head>
+<body>
+  <canvas id="world" aria-label="מגרש הקפצות תלת ממדי בחוף"></canvas>
+  <div class="vignette" aria-hidden="true"></div>
+  <header class="topbar">
+    <a class="wordmark" href="./" aria-label="אטלנטה — מסך פתיחה">אטלנטה<span>BEACH CLUB</span></a>
+    <div class="top-actions">
+      <button id="music-button" class="icon-button" aria-label="מוזיקה וצלילים" title="מוזיקה וצלילים">♫</button>
+      <button id="help-button" class="icon-button" aria-label="איך משחקים" title="איך משחקים">?</button>
+      <button id="camera-button" class="icon-button" aria-label="החלפת זווית מצלמה" title="החלפת מצלמה" hidden>◉</button><button id="pause-button" class="icon-button" aria-label="השהיה" title="השהיה" hidden>Ⅱ</button>
+    </div>
+  </header>
+
+  <main id="home" class="home">
+    <div class="home-copy">
+      <div class="eyebrow"><span>01</span> היום הראשון בחוף</div>
+      <h1>הכדור באוויר.<br><em>כל החוף שלך.</em></h1>
+      <p>ארבעה במעגל. כדור אחד.<br>נגיעה למסירה. החלקה לתרגיל.<br>תפוס קצב, השאר את הכדור באוויר.</p>
+      <button id="play-button" class="primary play"><span>נכנסים למעגל</span><span aria-hidden="true">◀</span></button>
+      <div class="home-links"><button id="moves-button">מדריך לתרגילים</button><span class="divider">/</span><button id="profile-button">פרופיל השחקן</button><span class="divider">/</span><button id="journey-button">המסלול שלך</button></div>
+      <div class="home-links"><button id="free-button">מעגל חופשי</button><span class="divider">/</span><button id="phone-button">נוחות בטלפון</button></div><small class="version-note">שלב ראשון · גרסה ניסיונית</small>
+    </div>
+    <div class="home-caption"><span>PLAYA / 01</span><strong>פשוט אל תפיל.</strong></div>
+    <div id="load-state" class="load-state" role="status">מכינים את החוף…</div>
+  </main>
+
+  <div id="hud" class="hud" hidden>
+    <div class="scoreboard">
+      <div class="score-main"><span>ניקוד</span><strong id="score">0</strong></div>
+      <div class="score-divider"></div>
+      <div><span>רצף</span><strong id="combo">0</strong></div>
+      <div class="hearts" id="hearts" aria-label="3 ניסיונות">● ● ●</div>
+    </div>
+    <div class="level-panel"><div><strong>שלב 01</strong><span id="objective">350 נק׳ + 2 הנחתות</span></div><div class="level-track"><i id="level-fill"></i></div></div>
+    <div id="player-labels"></div>
+    <div id="aim-label">לחץ על חבר כדי לכוון אליו</div>
+    <div id="speech" class="speech" hidden></div>
+    <div id="floating" class="floating" aria-live="polite"></div>
+    <div id="ball-cue" class="ball-cue" aria-hidden="true"><div></div></div>
+    <div id="attack-cue" class="attack-cue" role="status" hidden></div>
+    <div id="turn-label" class="turn-label">ניקו מגיש</div>
+    <div id="practice-coach" class="practice-coach" hidden>
+      <div class="lesson-meta"><span id="lesson-stage">רואים הדגמה</span><span id="lesson-progress">0 / 3</span></div>
+      <strong id="practice-name"></strong><p id="practice-instruction"></p><small id="practice-tip"></small>
+      <div class="lesson-actions"><button id="lesson-toggle" class="primary">עכשיו תורי</button><button id="lesson-next" class="secondary" hidden>לתרגיל הבא</button></div>
+    </div>
+    <div class="bottom-ui">
+      <div id="touch-coach" class="touch-coach">נגיעה למסירה · החזק להנחתה</div>
+      <div class="jump-contact">
+        <button id="contact-button" class="contact-button" aria-label="פעולה: נגיעה למסירה, החלקה למעלה להרמה, לצדדים לתרגיל, החזקה להנחתה" aria-describedby="gesture-hint">
+          <i id="gesture-demo" aria-hidden="true"></i><strong id="contact-name">מסירה</strong><span id="contact-hint">נגיעה</span>
+        </button>
+        <button id="smash-button" aria-label="הנחתה: החזקה ארוכה מחזקת את המכה, שחרור מבצע"><b>הנחתה</b><span>החזק ושחרר</span></button>
+        <button id="jump-button" aria-label="קפיצה — אפשר לנגוח באוויר"><b>↟</b><span>קפיצה</span></button>
+      </div>
+      <div id="height-tabs" role="group" aria-label="גובה התרגיל"><button data-height="low">נמוך</button><button data-height="middle">אמצע</button><button data-height="high">גבוה</button></div><div class="quick-heading" id="gesture-hint">תרגילים</div>
+      <div id="quick-tricks" role="group" aria-label="שלושת התרגילים שלי לגובה הכדור"><button disabled></button><button disabled></button><button disabled></button></div>
+    </div>
+    <div id="joystick" role="group" aria-label="גרור בעדינות לתנועה; בזמן החזקת הנחתה הגלגלת מכוונת"><div id="joystick-guide" hidden aria-hidden="true"></div><div id="joystick-knob"></div><span id="move-assist">עזרה בתנועה פעילה</span></div>
+  </div>
+
+  <div id="rotate-panel" class="rotate-panel" hidden role="dialog" aria-modal="true" aria-labelledby="rotate-title">
+    <div><span class="rotate-symbol" aria-hidden="true">↶</span><h2 id="rotate-title">את המעגל רואים לרוחב.</h2>
+    <p>סובב את הטלפון לרוחב כדי לשחק.<br>הכדור מחכה לך עד שהמסך מסתובב.</p>
+    <button id="landscape-button" class="primary">מסך מלא לרוחב</button>
+    <p id="rotate-help">אם המסך לא מסתובב, בטל את נעילת הסיבוב במכשיר.</p><button id="rotate-home" class="secondary">חזרה לתפריט</button></div>
+  </div>
+  <div id="countdown" class="countdown" hidden aria-live="polite"></div>
+  <dialog id="panel" aria-labelledby="panel-title"><button id="panel-close" class="close-button" aria-label="סגירה">×</button><div id="panel-content"></div></dialog>
+  <input id="song-file" type="file" accept="audio/*" hidden>
+  <audio id="user-song" loop preload="none"></audio>
+  <script type="module" src="./main.js?v=13"></script>
+  <script>window.addEventListener('error',function(e){if(e.target&&e.target.tagName==='SCRIPT'){var s=document.getElementById('load-state');if(s)s.textContent='המשחק לא נטען. נסה לרענן את העמוד.'}},true);</script>
+</body>
+</html>
