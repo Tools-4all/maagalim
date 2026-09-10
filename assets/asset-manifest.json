@@ -1,0 +1,142 @@
+{
+  "license": "CC0 1.0",
+  "license_url": "https://polyhaven.com/license",
+  "texture_source": "https://polyhaven.com/a/aerial_beach_01",
+  "texture_author": "Rob Tuytel",
+  "texture_scale_metres": 30,
+  "environment_source": "https://polyhaven.com/a/spiaggia_di_mondello",
+  "environment_author": "Andreas Mischok",
+  "files": [
+    {
+      "filename": "sand-diffuse-1k.jpg",
+      "download_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/aerial_beach_01/aerial_beach_01_diff_1k.jpg",
+      "md5": "0ec8483b18d960f2152dae2a64806b3d",
+      "bytes": 115382,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "format": "JPEG",
+      "mode": "RGB"
+    },
+    {
+      "filename": "sand-normal-gl-1k.jpg",
+      "download_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/aerial_beach_01/aerial_beach_01_nor_gl_1k.jpg",
+      "md5": "f6810f845aefe51dccf4c4ac6f2ab05a",
+      "bytes": 262878,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "format": "JPEG",
+      "mode": "RGB"
+    },
+    {
+      "filename": "mondello-environment-1k.hdr",
+      "download_url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/spiaggia_di_mondello_1k.hdr",
+      "md5": "999d56c0ca639ea58f1d795aaa6b39d3",
+      "bytes": 1533242,
+      "dimensions": [
+        1024,
+        512
+      ],
+      "format": "Radiance HDR / 32-bit RLE RGBE",
+      "projection": "equirectangular"
+    },
+    {
+      "filename": "mondello-tonemapped-original.jpg",
+      "download_url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/spiaggia_di_mondello.jpg",
+      "md5": "ae13689e3fe92ef57f0e09f220bf97cb",
+      "bytes": 3907991,
+      "dimensions": [
+        8192,
+        4096
+      ],
+      "format": "JPEG",
+      "mode": "RGB"
+    },
+    {
+      "filename": "mondello-background-4k.jpg",
+      "derived_from": "mondello-tonemapped-original.jpg",
+      "dimensions": [
+        4096,
+        2048
+      ],
+      "format": "JPEG",
+      "mode": "RGB",
+      "bytes": 1274056,
+      "projection": "equirectangular",
+      "change": "Lanczos resize from official 8192x4096 tonemapped JPEG; JPEG quality 88"
+    }
+  ],
+  "skin_assets": [
+    {
+      "filename": "skin-male.jpg",
+      "source_pack": "https://files2.makehumancommunity.org/asset_packs/makehuman_system_assets/makehuman_system_assets_cc0.zip",
+      "source_entry": "skins/young_caucasian_male/young_lightskinned_male_diffuse.png",
+      "license": "CC0 1.0",
+      "license_url": "https://static.makehumancommunity.org/about/license.html",
+      "dimensions": [
+        2048,
+        2048
+      ],
+      "sha256": "8d07db257b796faa4430d30a85d2e9aaaaea126d66cf02a31b5155eb6b3b6c86",
+      "bytes": 303268,
+      "change": "PNG to JPEG; UV mapping unchanged"
+    },
+    {
+      "filename": "skin-female.jpg",
+      "source_pack": "https://files2.makehumancommunity.org/asset_packs/makehuman_system_assets/makehuman_system_assets_cc0.zip",
+      "source_entry": "skins/young_caucasian_female2/young_lightskinned_female_diffuse2.png",
+      "license": "CC0 1.0",
+      "license_url": "https://static.makehumancommunity.org/about/license.html",
+      "dimensions": [
+        2048,
+        2048
+      ],
+      "sha256": "288670bed08a9e1cfbfa10bf4dba500d5acef05876fbacb7caf39639581b9937",
+      "bytes": 257878,
+      "change": "PNG to JPEG; UV mapping unchanged"
+    },
+    {
+      "filename": "skin-dark.jpg",
+      "source_pack": "https://files2.makehumancommunity.org/asset_packs/makehuman_system_assets/makehuman_system_assets_cc0.zip",
+      "source_entry": "skins/young_african_male/young_darkskinned_male_diffuse.png",
+      "license": "CC0 1.0",
+      "license_url": "https://static.makehumancommunity.org/about/license.html",
+      "dimensions": [
+        2048,
+        2048
+      ],
+      "sha256": "c299dea6832b2ce1c3275e76780742f44b43eb1da8ef6dac862aa6cc528cd862",
+      "bytes": 201396,
+      "change": "PNG to JPEG; UV mapping unchanged"
+    }
+  ],
+  "music_assets": [
+    {
+      "filename": "mamacita.m4a",
+      "title": "Mamacita",
+      "artist": "Mike Leite",
+      "source": "https://www.free-stock-music.com/mike-leite-mamacita.html",
+      "download_url": "https://www.free-stock-music.com/music/mike-leite/mp3/mike-leite-mamacita.mp3",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "sha256": "8532f5c04ad9b6940813929fba036ec3e7b34a0564c291bcfa130267a43a50dd",
+      "bytes": 4027502,
+      "change": "Complete recording transcoded from MP3 to AAC 160kbps; no remix"
+    },
+    {
+      "filename": "vacaciones.m4a",
+      "title": "Vacaciones",
+      "artist": "Mike Leite",
+      "source": "https://www.free-stock-music.com/mike-leite-vacaciones.html",
+      "download_url": "https://www.free-stock-music.com/music/mike-leite/mp3/mike-leite-vacaciones.mp3",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "sha256": "1b9abb02ead8ae6fe4550873ea28bb4999c6903b4c5895ac8502f78bf91827e8",
+      "bytes": 4041275,
+      "change": "Complete recording transcoded from MP3 to AAC 160kbps; no remix"
+    }
+  ]
+}
