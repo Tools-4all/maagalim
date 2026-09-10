@@ -1,0 +1,154 @@
+/* מסך בית בסגנון משחק מובייל: HUD שקוף מעל סצנת החוף, לא עמוד נחיתה. */
+/* נטען אחרון, ולכן גובר על פריסת ה-.home הישנה.                        */
+
+/* :not([hidden]) חיוני — בלעדיו ה-!important גובר על [hidden]{display:none}
+   ומסך הבית נשאר על המסך גם בזמן משחק וטיול. */
+.home:not([hidden]){
+ position:fixed;inset:0;display:block!important;align-items:stretch!important;
+ pointer-events:none;background:none!important;
+}
+.home:before{content:none!important}
+.home-shell{
+ pointer-events:auto;
+ position:absolute;inset:0;
+ display:flex;flex-direction:column;
+ padding:calc(18px + env(safe-area-inset-top)) 16px calc(8px + env(safe-area-inset-bottom));
+ gap:12px;
+ /* הצללה עדינה מלמעלה ומלמטה כדי שהטקסט ייקרא בלי לכסות את החוף */
+ background:linear-gradient(180deg,#04202c9e,transparent 26%,transparent 54%,#03202dc4);
+}
+
+/* כרטיס השחקן תופס את מקום הלוגו במסך הבית — אין צורך בשניהם */
+body:not(.playing) .wordmark{display:none}
+/* בלי הלוגו, space-between היה דוחף את האייקונים לצד של כרטיס השחקן */
+body:not(.playing) .topbar{padding-top:calc(19px + env(safe-area-inset-top));justify-content:flex-end}
+
+/* —— כרטיס השחקן —— */
+.player-card{
+ display:flex;align-items:center;gap:11px;
+ padding:8px 12px 8px 8px;border-radius:16px;
+ background:var(--glass);border:1px solid #ffffff2e;backdrop-filter:blur(12px);
+ box-shadow:0 8px 24px #04202c3d;
+ align-self:flex-start;max-width:min(268px,calc(100% - 118px));
+}
+.avatar-chip{
+ width:44px;height:44px;flex-shrink:0;border-radius:13px;overflow:hidden;
+ display:grid;place-items:center;
+ background:linear-gradient(150deg,#1d5a68,#0d3946);border:1px solid #ffffff33;
+}
+.avatar-chip img{width:100%;height:100%;object-fit:cover;object-position:50% 22%}
+.avatar-chip span{font-size:16px;font-weight:800;color:var(--lime);letter-spacing:.5px}
+.player-meta{min-width:0;flex:1}
+.player-meta>strong{
+ display:block;font-size:15px;font-weight:800;letter-spacing:-.2px;
+ white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.xp-row{display:flex;align-items:center;gap:7px;margin-top:5px}
+.level-chip{
+ font-size:10px;font-weight:800;letter-spacing:.4px;white-space:nowrap;
+ background:#dcfc681f;color:var(--lime);border:1px solid #dcfc6840;
+ padding:2px 7px;border-radius:20px;
+}
+.xp-track{flex:1;height:4px;min-width:44px;border-radius:4px;background:#ffffff26;overflow:hidden}
+.xp-track i{display:block;height:100%;width:0;border-radius:4px;background:var(--lime);transition:width .5s ease-out}
+.xp-value{font-size:10px;font-weight:700;opacity:.75;font-variant-numeric:tabular-nums}
+
+/* —— הפעולה המרכזית —— */
+.home-cta{
+ flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+ gap:0;text-align:center;
+}
+button.primary.cta{
+ display:block;width:min(300px,86%);
+ padding:16px 28px;min-height:58px;
+ font-size:20px;font-weight:900;letter-spacing:-.3px;border-radius:16px;
+ background:var(--lime);color:var(--ink);
+ box-shadow:0 10px 30px #dcfc6833,0 3px 12px #0a2e3a4d;
+ transition:transform .14s,box-shadow .14s;
+}
+button.primary.cta:hover{background:var(--lime);transform:translateY(-2px);box-shadow:0 14px 36px #dcfc6842}
+button.primary.cta:active{transform:translateY(0) scale(.985)}
+.cta-sub{margin:11px 0 0;font-size:13px;color:#dbe7eb;text-shadow:0 1px 8px #06202c}
+.cta-secondary{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;justify-content:center}
+.chip{
+ background:#ffffff14;border:1px solid #ffffff2b;backdrop-filter:blur(8px);
+ padding:8px 14px;min-height:36px;border-radius:20px;
+ font-size:12.5px;font-weight:600;color:#e6eff2;
+}
+.chip:hover{background:#ffffff24}
+
+/* —— כרטיסיות מידע —— */
+.home-cards{
+ display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;
+}
+.mini-card{
+ padding:9px 10px;border-radius:13px;min-width:0;
+ background:var(--glass);border:1px solid #ffffff20;backdrop-filter:blur(10px);
+}
+.mini-card span{display:block;font-size:9.5px;letter-spacing:.3px;opacity:.66;font-weight:600}
+.mini-card strong{
+ display:block;font-size:19px;font-weight:800;line-height:1.15;margin-top:2px;
+ color:var(--lime);font-variant-numeric:tabular-nums;
+ white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.mini-card small{
+ display:block;font-size:10px;opacity:.62;margin-top:2px;
+ white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+
+/* —— ניווט תחתון —— */
+.home-nav{
+ display:grid;grid-template-columns:repeat(5,1fr);gap:2px;
+ padding:5px 4px;border-radius:19px;
+ background:#062a37cc;border:1px solid #ffffff26;backdrop-filter:blur(16px);
+ box-shadow:0 -2px 24px #03161f52;
+}
+.nav-item{
+ display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+ min-height:50px;padding:6px 2px;border-radius:14px;background:transparent;
+ color:#c3d4da;transition:background .16s,color .16s;
+}
+.nav-item i{font-style:normal;font-size:17px;line-height:1}
+.nav-item span{font-size:9.5px;font-weight:600;letter-spacing:-.1px;white-space:nowrap}
+.nav-item:hover{background:#ffffff12;color:#eaf3f5}
+.nav-item.active{background:#dcfc6817;color:var(--lime)}
+.nav-item.active i{transform:scale(1.06)}
+
+/* —— מסכים צרים —— */
+@media(max-width:400px){
+ .home-shell{padding-left:12px;padding-right:12px;gap:10px}
+ button.primary.cta{width:92%;font-size:18px;min-height:54px}
+ .home-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .mini-card strong{font-size:18px}
+ .nav-item span{font-size:9px}
+}
+
+/* —— טלפון לרוחב: מרכז פנוי, הכל נדחק לשוליים —— */
+@media(orientation:landscape) and (max-height:560px){
+ .home-shell{padding-top:calc(8px + env(safe-area-inset-top));gap:8px;
+  background:linear-gradient(180deg,#04202c94,transparent 34%,transparent 50%,#03202dc9)}
+ .player-card{padding:6px 10px 6px 6px;gap:9px;border-radius:13px}
+ .avatar-chip{width:36px;height:36px;border-radius:11px}
+ .player-meta>strong{font-size:13px}
+ .home-cta{flex:1}
+ button.primary.cta{min-height:46px;padding:11px 24px;font-size:17px;width:min(260px,60%)}
+ .cta-sub{margin-top:7px;font-size:12px}
+ .cta-secondary{margin-top:9px}
+ .chip{min-height:30px;padding:6px 11px;font-size:11.5px}
+ .home-cards{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+ .mini-card{padding:6px 8px;border-radius:11px}
+ .mini-card strong{font-size:15px}
+ .mini-card small{display:none}
+ .home-nav{padding:3px;border-radius:15px}
+ .nav-item{min-height:40px;padding:4px 2px}
+ .nav-item i{font-size:14px}
+ .nav-item span{font-size:9px}
+}
+
+/* מצב הטעינה יושב מעל הניווט ולא מתנגש בו */
+.home .load-state{bottom:calc(84px + env(safe-area-inset-bottom))}
+
+@media(prefers-reduced-motion:reduce){
+ button.primary.cta,.nav-item,.xp-track i{transition:none}
+ button.primary.cta:hover{transform:none}
+}

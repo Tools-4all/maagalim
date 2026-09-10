@@ -1,0 +1,42 @@
+/* שלט הקרבה למעגל: פס קומפקטי בתחתית המסך, לא חוסם את מרכז המשחק. */
+.circle-invite{
+ position:absolute;left:50%;bottom:calc(16px + env(safe-area-inset-bottom));
+ transform:translateX(-50%);
+ z-index:4;pointer-events:auto;
+ display:flex;align-items:center;gap:11px;
+ width:max-content;max-width:min(370px,calc(100% - 24px));
+ padding:9px 12px;border-radius:14px;
+ background:var(--glass);border:1px solid #ffffff38;backdrop-filter:blur(10px);
+ box-shadow:0 10px 26px #04202c4d;
+ animation:invite-in .2s ease-out;
+}
+.invite-copy{flex:1;min-width:0}
+.invite-copy strong{display:block;font-size:14px;font-weight:800;letter-spacing:-.2px}
+.invite-copy p{
+ margin:2px 0 0;font-size:11.5px;line-height:1.35;color:#cfdde3;
+ display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.circle-invite .primary{
+ flex-shrink:0;min-height:36px;padding:8px 14px;font-size:13px;border-radius:9px;white-space:nowrap;
+}
+@keyframes invite-in{from{opacity:0;transform:translate(-50%,12px)}to{opacity:1;transform:translateX(-50%)}}
+
+/* בזמן משחק פעיל התחתית תפוסה בפקדים — השלט עולה לראש המסך */
+body:not(.roaming) .circle-invite{bottom:auto;top:calc(64px + env(safe-area-inset-top))}
+@keyframes invite-in-top{from{opacity:0;transform:translate(-50%,-10px)}to{opacity:1;transform:translateX(-50%)}}
+body:not(.roaming) .circle-invite{animation-name:invite-in-top}
+
+/* מסך נמוך לרוחב — הפורמט שבו באמת משחקים בטלפון */
+@media(orientation:landscape) and (max-height:600px){
+ .circle-invite{bottom:calc(10px + env(safe-area-inset-bottom));gap:9px;padding:7px 10px;border-radius:12px;max-width:min(330px,calc(100% - 20px))}
+ .invite-copy strong{font-size:13px}
+ .invite-copy p{font-size:11px;-webkit-line-clamp:1}
+ .circle-invite .primary{min-height:32px;padding:7px 12px;font-size:12px}
+}
+@media(max-width:650px){
+ .circle-invite{gap:9px;padding:8px 11px;max-width:calc(100% - 20px)}
+ .invite-copy strong{font-size:13px}
+ .invite-copy p{font-size:11px}
+ .circle-invite .primary{min-height:34px;padding:8px 12px;font-size:12px}
+}
+@media(prefers-reduced-motion:reduce){.circle-invite{animation:none}}

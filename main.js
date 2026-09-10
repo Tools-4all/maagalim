@@ -1,6 +1,6 @@
 import {profilePreview} from './profile-view.js';
 import {PLAY_SPEED,reactionSpeed,nudgeAim,aimFeedback} from './precision.js';
-import {GROUPS,normalizeProfile,readProfile,writeProfile,quickChoices,chooseQuick} from './loadout.js';
+import {GROUPS,normalizeProfile,readProfile,writeProfile,hasProfile,quickChoices,chooseQuick} from './loadout.js';
 import {installViewport} from './viewport.js';
 import {Game,clamp,chargeProfile} from './physics.js';
 import {loadHuman} from './avatar.js';
@@ -10,15 +10,18 @@ import {EXERCISES,LEVELS,TAUNTS,AI_MISSES} from './data.js';
 import {gestureIntent,HOLD_DELAY,SWIPE_DISTANCE,PRACTICE} from './controls.js';
 import {LESSONS,LESSON_ORDER,lessonFor,needsLandscape} from './guide.js';
 import {attachJoystick,movementInCamera} from './joystick.js';
+import {updateRoam} from './roam.js';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const game=new Game(), sound=new BeachAudio($('#user-song'));
 const syncViewport=installViewport();
 const keys=new Set(), storageKey='atlanta-beach-v1';
 let profileView=null,profileConfirmed=false;
+let roaming=false,lastCircle=null,veilBusy=false;
 let world,paused=false,panelWasPlaying=false,started=false,lastTime=0,frame=0;
 let floatUntil=0,speechUntil=0,speechActor=1,countTimer=null,joy={x:0,z:0},joyYaw=0,joystickControl;
 let profileStorage=null;try{profileStorage=window.localStorage;}catch{}
 let playerProfile=readProfile(profileStorage);
+profileConfirmed=hasProfile(profileStorage);
 let actionPress=null,lookStart=null,coachUntil=0,landscapeBlocked=false,attackUntil=0;
 let progress={bestScore:0,bestCombo:0,completed:false,rounds:0};
 try{const d=JSON.parse(localStorage.getItem(storageKey)||'null');if(d&&typeof d==='object')progress={bestScore:Number(d.bestScore)||0,bestCombo:Number(d.bestCombo)||0,completed:d.completed===true,rounds:Number(d.rounds)||0};}catch{}
@@ -100,8 +103,8 @@ quickButtons.forEach(b=>{b.onpointerdown=e=>{e.preventDefault();if(!b.disabled&&
 function editProfile(onDone=null){
  onDone=typeof onDone==='function'?onDone:null;
  const draft=normalizeProfile(playerProfile);
- openPanel('<h2 id="panel-title">הפרופיל שלך בחוף</h2><p>בחר מראה וציוד לפני המשחק. נשמר במכשיר הזה.</p><div class="profile-editor"><canvas id="profile-preview" aria-label="תצוגה מקדימה של הדמות והכדור"></canvas><div class="profile-fields"><label>שם<input id="profile-name" maxlength="24" autocomplete="given-name"></label><label>כינוי<input id="profile-nickname" maxlength="24" autocomplete="nickname"></label><label>מראה<select id="profile-style"><option value="male">שחקן · שיער קצר</option><option value="female">שחקנית · שיער אסוף</option></select></label><label>גוון עור<input id="profile-skin" type="color"></label><label>לבוש<select id="profile-outfit"><option value="shorts">בגד ים</option><option value="tank">גופייה ובגד ים</option></select></label><label>צבע לבוש<input id="profile-outfitColor" type="color"></label><label>כדור<select id="profile-ball"><option value="classic">קלאסי · צהוב</option><option value="tide">גל · טורקיז</option><option value="sunset">שקיעה · כתום</option></select></label></div></div><details><summary>התרגילים שלי · עד 3 לכל גובה</summary><div id="loadout-groups"></div></details><p id="loadout-status" role="status"></p><div class="actions"><button id="save-loadout" class="primary">שמור וחזור</button><button id="cancel-loadout" class="secondary">ביטול</button></div>');
- $('#save-loadout').textContent=onDone?'שמור והיכנס למעגל':'שמור וחזור';
+ openPanel('<h2 id="panel-title">'+(onDone?'יוצרים פרופיל':'הפרופיל שלך בחוף')+'</h2><p>'+(onDone?'בוחרים שם ומראה פעם אחת. הפרופיל נשמר במכשיר ונטען לבד בכניסה הבאה.':'עדכון המראה והציוד. השינויים נשמרים על אותו פרופיל.')+'</p><div class="profile-editor"><canvas id="profile-preview" aria-label="תצוגה מקדימה של הדמות והכדור"></canvas><div class="profile-fields"><label>שם<input id="profile-name" maxlength="24" autocomplete="given-name"></label><label>כינוי<input id="profile-nickname" maxlength="24" autocomplete="nickname"></label><label>מראה<select id="profile-style"><option value="male">שחקן · שיער קצר</option><option value="female">שחקנית · שיער אסוף</option></select></label><label>גוון עור<input id="profile-skin" type="color"></label><label>לבוש<select id="profile-outfit"><option value="shorts">בגד ים</option><option value="tank">גופייה ובגד ים</option></select></label><label>צבע לבוש<input id="profile-outfitColor" type="color"></label><label>כדור<select id="profile-ball"><option value="classic">קלאסי · צהוב</option><option value="tide">גל · טורקיז</option><option value="sunset">שקיעה · כתום</option></select></label></div></div><details><summary>התרגילים שלי · עד 3 לכל גובה</summary><div id="loadout-groups"></div></details><p id="loadout-status" role="status"></p><div class="actions"><button id="save-loadout" class="primary">שמור וחזור</button>'+(onDone?'':'<button id="cancel-loadout" class="secondary">ביטול</button>')+'</div>');
+ $('#save-loadout').textContent=onDone?'צור פרופיל · יוצאים לחוף':'שמור וחזור';
  try{profileView=profilePreview($('#profile-preview'));profileView.update(draft);}catch{$('#profile-preview').hidden=true;}
  for(const key of ['name','nickname','style','skin','outfit','outfitColor','ball']){const input=$('#profile-'+key);input.value=draft[key];input.onchange=()=>{draft[key]=input.value;profileView?.update(normalizeProfile(draft));};}
 
@@ -110,8 +113,47 @@ function editProfile(onDone=null){
   for(const id of group.moves){const label=document.createElement('label'),input=document.createElement('input'),span=document.createElement('span');input.type='checkbox';input.checked=draft.slots[key].includes(id);span.textContent=EXERCISES.find(e=>e.id===id).name;label.append(input,span);section.append(label);input.onchange=()=>{if(input.checked&&draft.slots[key].length===3){input.checked=false;$('#loadout-status').textContent='אפשר לבחור עד 3 — הסר תרגיל כדי להחליף אותו.';return;}draft.slots[key]=input.checked?[...draft.slots[key],id]:draft.slots[key].filter(x=>x!==id);$('#loadout-status').textContent=draft.slots[key].length+'/3 נבחרו';};}
   $('#loadout-groups').append(section);
  }
- $('#save-loadout').onclick=()=>{draft.name=$('#profile-name').value;draft.nickname=$('#profile-nickname').value;playerProfile=normalizeProfile(draft);world.applyProfile(playerProfile);profileConfirmed=true;if(!writeProfile(profileStorage,playerProfile)){$('#loadout-status').textContent='הדפדפן לא מאפשר שמירה. אפשר להמשיך עם הפרופיל להפעלה הזו.';$('#save-loadout').textContent='המשך בלי שמירה';$('#save-loadout').onclick=()=>{closePanel();if(onDone)onDone();};return;}closePanel();if(onDone)onDone();};$('#cancel-loadout').onclick=closePanel;
+ $('#save-loadout').onclick=()=>{draft.name=$('#profile-name').value;draft.nickname=$('#profile-nickname').value;playerProfile=normalizeProfile(draft);world.applyProfile(playerProfile);profileConfirmed=true;refreshHome();if(!writeProfile(profileStorage,playerProfile)){$('#loadout-status').textContent='הדפדפן לא מאפשר שמירה. אפשר להמשיך עם הפרופיל להפעלה הזו.';$('#save-loadout').textContent='המשך בלי שמירה';$('#save-loadout').onclick=()=>{closePanel();if(onDone)onDone();};return;}closePanel();if(onDone)onDone();};const cancelButton=$('#cancel-loadout');if(cancelButton)cancelButton.onclick=closePanel;
 }
+// מסך היצירה נפתח רק בפעם הראשונה. אחר כך נכנסים ישר עם הפרופיל השמור.
+function ensureProfile(next){if(profileConfirmed)next();else editProfile(next);}
+// —— מסך הבית ——
+// כל המספרים מגיעים מהפרופיל השמור ומ-progress הקיים. אין כאן לוגיקת התקדמות חדשה.
+function homeAvatar(){
+ const img=$('#home-avatar'),initials=$('#home-initials');
+ const label=(playerProfile.nickname||playerProfile.name||'').trim();
+ initials.textContent=label?[...label][0]:'☺';
+ try{
+  const canvas=document.createElement('canvas');
+  const view=profilePreview(canvas);view.update(normalizeProfile(playerProfile));
+  const url=canvas.toDataURL('image/png');view.dispose?.();
+  if(url&&url.length>2000){img.src=url;img.hidden=false;initials.hidden=true;return;}
+ }catch{/* אין WebGL פנוי — ראשי תיבות זו נפילה רכה מספקת */}
+ img.hidden=true;initials.hidden=false;
+}
+function refreshHome(){
+ if(!$('#home-name'))return;
+ $('#home-name').textContent=playerProfile.nickname||playerProfile.name;
+ const pct=Math.round(clamp(progress.bestScore/350,0,1)*100);
+ $('#home-xp').style.width=pct+'%';
+ $('#home-xp-value').textContent=pct+'%';
+ $('#card-score').textContent=progress.bestScore;
+ $('#card-progress').textContent=Math.min(progress.bestScore,350)+'/350 ליעד';
+ $('#card-circle').textContent=progress.rounds?progress.rounds:'—';
+ $('#card-circle-note').textContent=progress.rounds?'סיבובים עד היום':'עוד לא שיחקת';
+ homeAvatar();
+}
+function achievements(){
+ openPanel('<div class="panel-eyebrow">HALL OF FAME</div><h2 id="panel-title">ההישגים שלך</h2>'+
+  '<div class="stat-grid"><div><strong>'+progress.bestScore+'</strong><span>שיא ניקוד</span></div>'+
+  '<div><strong>'+progress.bestCombo+'</strong><span>רצף הכי ארוך</span></div>'+
+  '<div><strong>'+progress.rounds+'</strong><span>סיבובים</span></div></div>'+
+  '<p>'+(progress.completed?'סיימת את שלב 01 — כל הכבוד. ':'')+'ההישגים נשמרים במכשיר הזה בלבד.</p>'+
+  '<button id="close-achievements" class="secondary full">סגור</button>');
+ $('#close-achievements').onclick=closePanel;
+}
+$('#achievements-button').onclick=achievements;
+$('#home-tab').onclick=()=>{};
 $('#profile-button').onclick=()=>editProfile();
  $$('[data-height]').forEach(b=>b.onclick=()=>{game.quickGroup=b.dataset.height;updateQuick();});
 
@@ -145,16 +187,64 @@ $('#user-song').addEventListener('playing',musicStatus);$('#user-song').addEvent
 $('#music-button').onclick=musicPanel;$('#song-file').onchange=async e=>{const file=e.target.files?.[0];if(!file)return;if(file.size>80*1024*1024){if($('#song-status'))$('#song-status').textContent='בחרו קובץ קטן מ־80MB.';return;}await sound.start();sound.setMusic(true);try{await sound.chooseFile(file);if($('#song-status'))$('#song-status').textContent=file.name;}catch{if($('#song-status'))$('#song-status').textContent='הפורמט לא נתמך. נסו MP3 או M4A.';}e.target.value='';};
 
 function setPlayScreen(){
-  $('#home').hidden=true;$('#hud').hidden=false;$('#pause-button').hidden=false;$('#camera-button').hidden=false;
+  $('#home').hidden=true;$('#hud').hidden=false;$('#pause-button').hidden=false;$('#camera-button').hidden=false;$('#exit-button').hidden=false;
+  // יציאה מפורשת ממצב טיול — אחרת הלולאה ממשיכה בענף ה-roam,
+  // game.update לא נקרא בכלל, וה-CSS של הטיול מסתיר את פקדי המשחק.
+  roaming=false;document.body.classList.remove('roaming');$('#circle-invite').hidden=true;
   document.body.classList.add('playing');$('#speech').hidden=true;$('#floating').classList.remove('show');
   $('#practice-coach').hidden=!game.practice;$('.level-panel').hidden=game.practice;$('#hearts').hidden=game.practice||game.rallyMode;
   world.setPlaying(true);started=true;sound.start();document.body.classList.toggle('in-guide',game.guided);syncLandscape();if(landscapeBlocked)sound.pause();
 }
+// הבהוב קצר שמכסה את החלפת המצב בין חוף למעגל. לא מסך טעינה —
+// המצב מתחלף באמצע, כך שאין קאט חד ואין תחושת טלפורט.
+function transition(mid){
+ const veil=$('#veil');
+ if(!veil||veilBusy){mid();return;}
+ veilBusy=true;veil.hidden=false;
+ requestAnimationFrame(()=>veil.classList.add('on'));
+ setTimeout(()=>{
+  try{mid();}finally{
+   requestAnimationFrame(()=>{
+    veil.classList.remove('on');
+    setTimeout(()=>{veil.hidden=true;veilBusy=false;},280);
+   });
+  }
+ },230);
+}
+// חזרה לחוף ליד המעגל שממנו יצאנו, בלי לגעת בפרופיל או בהעדפות
+function exitToBeach(){
+ const circle=lastCircle;
+ transition(()=>{
+  clearInterval(countTimer);countTimer=null;cancelAction();
+  paused=false;game.status='idle';game.practice=false;
+  const spawn=circle?{x:clamp(circle.x,-29,29),z:clamp(circle.z+(circle.r||2.5)+2.4,-9,25)}:null;
+  startRoam(spawn);
+ });
+}
+function startRoam(spawn=null){
+ if(!world)return;
+ panelWasPlaying=false;closePanel();clearInterval(countTimer);countTimer=null;cancelAction();
+ game.practice=false;game.status='idle';paused=false;
+ $('#home').hidden=true;$('#hud').hidden=false;$('#pause-button').hidden=false;$('#camera-button').hidden=true;
+ $('#countdown').hidden=true;$('#speech').hidden=true;$('#circle-invite').hidden=true;
+ document.body.classList.add('playing','roaming');document.body.classList.remove('in-guide','show-demo');
+ $('#exit-button').hidden=true;
+ roaming=true;world.setRoaming(true,spawn);started=true;sound.start();
+ syncLandscape();if(landscapeBlocked)sound.pause();
+}
+function updateRoamHUD(){
+ const near=world.nearbyCircle(),invite=$('#circle-invite'),hint=$('#roam-hint');
+ if(near){
+  if(invite.dataset.circle!==near.id){invite.dataset.circle=near.id;$('#circle-name').textContent=near.name;$('#circle-desc').textContent=near.desc;}
+  invite.hidden=false;if(hint)hint.classList.add('dim');
+ }else{invite.hidden=true;invite.dataset.circle='';if(hint)hint.classList.remove('dim');}
+ $('#move-assist').textContent='גרור לתנועה';
+}
 function goHome(){
   panelWasPlaying=false;closePanel();clearInterval(countTimer);countTimer=null;cancelAction();
-  paused=false;started=false;game.status='idle';game.practice=false;world.setPlaying(false);
-  $('#home').hidden=false;$('#hud').hidden=true;$('#countdown').hidden=true;$('#pause-button').hidden=true;$('#camera-button').hidden=true;
-  document.body.classList.remove('playing','in-guide','show-demo');$('#speech').hidden=true;$('#attack-cue').hidden=true;syncLandscape();keys.clear();releaseJoy();sound.pause();
+  paused=false;started=false;roaming=false;game.status='idle';game.practice=false;world.setPlaying(false);
+  $('#home').hidden=false;$('#hud').hidden=true;refreshHome();$('#countdown').hidden=true;$('#pause-button').hidden=true;$('#camera-button').hidden=true;$('#exit-button').hidden=true;
+  document.body.classList.remove('playing','in-guide','show-demo','roaming');$('#speech').hidden=true;$('#attack-cue').hidden=true;$('#circle-invite').hidden=true;syncLandscape();keys.clear();releaseJoy();sound.pause();
 }
 function startGame(free=false){
   if(!profileConfirmed){editProfile(()=>startGame(free===true));return;}
@@ -186,7 +276,14 @@ function updateGuide(){
 }
 $('#lesson-toggle').onclick=()=>{cancelAction();keys.clear();releaseJoy();if(game.phase==='demo'){world.yaw=0;game.tryGuide();}else game.showDemo();updateGuide();};
 $('#lesson-next').onclick=()=>{const i=LESSON_ORDER.indexOf(game.practiceMove);if(i+1<LESSON_ORDER.length)startPractice(LESSON_ORDER[i+1]);else startGame();};
-$('#play-button').onclick=()=>editProfile(()=>startGame());$('#free-button').onclick=()=>editProfile(()=>startGame(true));
+$('#circle-join').onclick=()=>{
+ const near=world.nearbyCircle();
+ if(near)lastCircle={id:near.id,name:near.name,x:near.x,z:near.z,r:near.r};
+ $('#circle-invite').hidden=true;
+ transition(()=>startGame(true));
+};
+$('#exit-button').onclick=exitToBeach;
+$('#play-button').onclick=()=>ensureProfile(()=>startRoam());$('#free-button').onclick=()=>ensureProfile(()=>startGame(true));
 $('#camera-button').onclick=()=>{world.toggleView();$('#camera-button').setAttribute('aria-label',world.view==='third'?'מעבר לגוף ראשון':'מעבר למבט מאחור');floating(world.view==='third'?'מבט מאחורי השחקן':'מבט מגוף ראשון');};
 function pauseMenu(){
   if(countTimer)return;if($('#panel').open){closePanel();return;}
@@ -198,11 +295,11 @@ function pauseMenu(){
     '<div class="settings-row"><label for="attack-difficulty">עוצמת היריבים</label><select id="attack-difficulty"><option value="relaxed">חוף רגוע</option><option value="hard">הנחתות חזקות</option><option value="expert">תחרותי</option></select></div>'+
     '<div class="settings-row"><label for="graphics-quality">איכות גרפיקה</label><select id="graphics-quality"><option value="auto">אוטומטית</option><option value="high">חדה</option><option value="smooth">חלקה</option></select></div>'+
     '<div class="actions"><button id="pause-moves" class="secondary">לומדים תרגילים</button><button id="pause-music" class="secondary">מוזיקה</button><button id="pause-profile" class="secondary">פרופיל השחקן</button><button id="pause-phone" class="secondary">נוחות בטלפון</button></div>'+
-    '<div class="actions"><button id="resume" class="primary">ממשיכים</button>'+(game.practice?'<button id="normal-round" class="secondary">למעגל רגיל</button>':'')+'<button id="exit-game" class="secondary">יציאה לחוף</button></div>');
+    '<div class="actions"><button id="resume" class="primary">ממשיכים</button>'+(game.practice?'<button id="normal-round" class="secondary">למעגל רגיל</button>':'')+'<button id="exit-game" class="secondary">'+(roaming?'לתפריט הראשי':'יציאה לחוף')+'</button>'+(roaming?'':'<button id="to-menu" class="secondary">לתפריט</button>')+'</div>');
   $('#attack-difficulty').value=game.difficulty;$('#attack-difficulty').onchange=e=>game.difficulty=e.target.value;$('#assist-toggle').onchange=e=>game.easy=e.target.checked;$('#graphics-quality').value=world.quality;$('#graphics-quality').onchange=e=>world.setQuality(e.target.value);
   $('#entry-toggle').onchange=e=>{if(e.target.checked)game.useApproachAim();else game.setAim(game.actors[1],1);};
   $('#pause-profile').onclick=editProfile;$('#pause-phone').onclick=phoneComfort;$('#pause-music').onclick=musicPanel;$('#pause-moves').onclick=moves;
-  $('#resume').onclick=closePanel;$('#exit-game').onclick=goHome;if($('#normal-round'))$('#normal-round').onclick=startGame;
+  $('#resume').onclick=closePanel;$('#exit-game').onclick=roaming?goHome:exitToBeach;if($('#to-menu'))$('#to-menu').onclick=goHome;if($('#normal-round'))$('#normal-round').onclick=startGame;
 }
 $('#pause-button').onclick=pauseMenu;
 function endRound(won){
@@ -332,6 +429,11 @@ function updateHUD(now){
   const id=game.guided?game.practiceMove:game.actionQueue?.move||game.selectedMove||game.contactFor('pass'),ready=game.phase==='guide-ready'||game.canHit(id);
   $('#contact-name').textContent=game.phase==='demo'?'ככה עושים':charging?'הנחתה':game.sequence?'בתרגיל':game.player.dive?'מצילים':game.actionQueue?'מוכן!':game.selectedMove?({hip:'צ׳ינגה','side-lunge':'הצלה','around-reverse':'סיבוב הפוך','foot-stall':'איזון','head-side':'נגיחת צד','knee-save':'הצלת ברך'}[game.selectedMove]||EXERCISES.find(e=>e.id===game.selectedMove).name):'מסירה';
   $('#contact-hint').textContent=charging?'שחרר להנחתה':game.phase==='guide-ready'&&id==='head'?'קפיצה ואז נגיעה':ready?({foot:'רגל',knee:'ירך',head:'נגיחה',chest:'חזה',inside:'פנימית',outside:'חיצונית',around:'סיבוב',heel:'עקב',shoulder:'כתף',alternate:'שתי ירכיים',cross:'הצלבה',lunge:'הצלה',scorpion:'סקורפיון',hip:'צ׳ינגה',rabona:'ראבונה','side-lunge':'הצלה צידית','around-reverse':'סיבוב הפוך','foot-stall':'איזון','head-side':'נגיחת צד','knee-save':'הצלת ברך'}[id])+' · עכשיו':'נגיעה';
+  const near=world.nearbyCircle(),invite=$('#circle-invite');
+  if(near&&!game.practice&&game.phase!=='demo'){
+   if(invite.dataset.circle!==near.id){invite.dataset.circle=near.id;$('#circle-name').textContent=near.name;$('#circle-desc').textContent=near.desc;}
+   invite.hidden=false;
+  }else{invite.hidden=true;invite.dataset.circle='';}
   updateQuick();
   contactButton.classList.toggle('ready',ready&&!charging);contactButton.classList.toggle('charging',charging);
   if(now>coachUntil)$('#touch-coach').textContent=game.practice?PRACTICE[game.practiceMove].gesture:game.receiver===0?'נגיעה למסירה · החזק להנחתה':'בחר חבר · החלק למעלה להרמה';
@@ -351,11 +453,14 @@ function loop(now){
     const stableJoy=movementInCamera(joy,joyYaw,game.player.yaw);
     let x=stableJoy.x,z=stableJoy.z;x+=(keys.has('KeyD')||keys.has('ArrowRight')?1:0)-(keys.has('KeyA')||keys.has('ArrowLeft')?1:0);
     z+=(keys.has('KeyS')||keys.has('ArrowDown')?1:0)-(keys.has('KeyW')||keys.has('ArrowUp')?1:0);
-    if(game.smashCharge.active&&joystickControl.active){nudgeAim(game,joy,joyYaw,dt);game.move(0,0,false,true);}else game.move(x,z,keys.has('ShiftLeft')||keys.has('ShiftRight'),joystickControl.active||movementKeys.some(k=>keys.has(k)));
-    game.update(dt*reactionSpeed(game));chargeAction(now);handleEvents();
+    if(roaming){game.move(x,z,keys.has('ShiftLeft')||keys.has('ShiftRight'),joystickControl.active||movementKeys.some(k=>keys.has(k)));updateRoam(game,dt,world.roamBlockers(game.player.x,game.player.z));}
+    else{
+     if(game.smashCharge.active&&joystickControl.active){nudgeAim(game,joy,joyYaw,dt);game.move(0,0,false,true);}else game.move(x,z,keys.has('ShiftLeft')||keys.has('ShiftRight'),joystickControl.active||movementKeys.some(k=>keys.has(k)));
+     game.update(dt*reactionSpeed(game));chargeAction(now);handleEvents();
+    }
   }
-  world.render(paused||landscapeBlocked?0:dt*reactionSpeed(game));if(started&&frame++%2===0)updateHUD(now);requestAnimationFrame(loop);
+  world.render(paused||landscapeBlocked?0:dt*reactionSpeed(game));if(started&&frame++%2===0){if(roaming)updateRoamHUD();else updateHUD(now);}requestAnimationFrame(loop);
 }
 try{
-  await loadHuman();world=new World($('#world'),game);world.applyProfile(playerProfile);world.setPlaying(false);$('#load-state').hidden=true;requestAnimationFrame(loop);
+  await loadHuman();world=new World($('#world'),game);world.applyProfile(playerProfile);world.setPlaying(false);refreshHome();$('#load-state').hidden=true;requestAnimationFrame(loop);
 }catch(e){console.error(e);$('#load-state').hidden=false;$('#load-state').classList.add('bad-news');$('#load-state').textContent='לא הצלחנו לפתוח תלת־ממד. נסה Safari או Chrome מעודכן.';$('#play-button').disabled=true;$('#moves-button').disabled=true;}

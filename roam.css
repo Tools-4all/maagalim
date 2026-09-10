@@ -1,0 +1,58 @@
+/* מצב טיול: משאירים ג'ויסטיק, סרגל עליון ושלט הקרבה. */
+/* כל פקדי הכדורעף מוסתרים כי אין משחק פעיל.                */
+body.roaming .scoreboard,
+body.roaming .level-panel,
+body.roaming .bottom-ui,
+body.roaming #turn-label,
+body.roaming #aim-label,
+body.roaming #ball-cue,
+body.roaming #attack-cue,
+body.roaming #player-labels,
+body.roaming #practice-coach,
+body.roaming #speech,
+body.roaming .floating{display:none!important}
+
+body.roaming #joystick{opacity:1}
+body.roaming #move-assist{color:#ffffffc4}
+
+/* רמז קצר שמסביר מה אפשר לעשות, נעלם ברגע שמתקרבים למעגל */
+.roam-hint{
+ position:absolute;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));
+ transform:translateX(-50%);z-index:2;pointer-events:none;
+ background:var(--glass);border:1px solid #ffffff30;backdrop-filter:blur(8px);
+ padding:9px 16px;border-radius:22px;font-size:13px;white-space:nowrap;
+ color:#e4eef1;transition:opacity .25s;
+}
+body:not(.roaming) .roam-hint{display:none!important}
+body.roaming .roam-hint.dim{opacity:0}
+
+@media(orientation:landscape) and (max-height:600px){
+ .roam-hint{bottom:calc(12px + env(safe-area-inset-bottom));font-size:12px;padding:7px 13px}
+}
+@media(max-width:650px){.roam-hint{font-size:12px;padding:8px 13px}}
+@media(prefers-reduced-motion:reduce){.roam-hint{transition:none}}
+
+/* —— מסך נקי בזמן משחק ובזמן טיול —— */
+/* הלוגו והסרגל העליון שייכים למסך הבית. במשחק הם רק רעש מעל החוף. */
+body.playing .wordmark{display:none}
+body.playing .topbar{
+ justify-content:flex-end;
+ padding:calc(14px + env(safe-area-inset-top)) 18px 8px;
+}
+/* בטיול אין מצלמה להחליף ואין מה להשהות מלבד היציאה */
+body.roaming #camera-button{display:none!important}
+body.roaming .topbar{pointer-events:none}
+body.roaming .top-actions{pointer-events:auto}
+
+@media(orientation:landscape) and (max-height:600px){
+ body.playing .topbar{padding:calc(9px + env(safe-area-inset-top)) 14px 6px}
+}
+
+/* —— מעבר בין חוף למעגל —— */
+/* הבהוב קצר שמכסה את החלפת המצב. לא מסך טעינה — חצי שנייה בסך הכל. */
+.veil{
+ position:fixed;inset:0;z-index:20;pointer-events:none;
+ background:#08222d;opacity:0;transition:opacity .22s ease-out;
+}
+.veil.on{opacity:1}
+@media(prefers-reduced-motion:reduce){.veil{transition:none}}

@@ -15,6 +15,9 @@
   <link rel="stylesheet" href="./controls.css">
   <link rel="stylesheet" href="./guide.css">
   <link rel="stylesheet" href="./comfort.css?v=13">
+  <link rel="stylesheet" href="./crowd.css">
+  <link rel="stylesheet" href="./roam.css">
+  <link rel="stylesheet" href="./home.css">
   <link rel="icon" href="data:,">
 </head>
 <body>
@@ -25,20 +28,50 @@
     <div class="top-actions">
       <button id="music-button" class="icon-button" aria-label="מוזיקה וצלילים" title="מוזיקה וצלילים">♫</button>
       <button id="help-button" class="icon-button" aria-label="איך משחקים" title="איך משחקים">?</button>
-      <button id="camera-button" class="icon-button" aria-label="החלפת זווית מצלמה" title="החלפת מצלמה" hidden>◉</button><button id="pause-button" class="icon-button" aria-label="השהיה" title="השהיה" hidden>Ⅱ</button>
+      <button id="camera-button" class="icon-button" aria-label="החלפת זווית מצלמה" title="החלפת מצלמה" hidden>◉</button><button id="exit-button" class="icon-button" aria-label="יציאה לחוף" title="יציאה לחוף" hidden>⤺</button><button id="pause-button" class="icon-button" aria-label="השהיה" title="השהיה" hidden>Ⅱ</button>
     </div>
   </header>
 
   <main id="home" class="home">
-    <div class="home-copy">
-      <div class="eyebrow"><span>01</span> היום הראשון בחוף</div>
-      <h1>הכדור באוויר.<br><em>כל החוף שלך.</em></h1>
-      <p>ארבעה במעגל. כדור אחד.<br>נגיעה למסירה. החלקה לתרגיל.<br>תפוס קצב, השאר את הכדור באוויר.</p>
-      <button id="play-button" class="primary play"><span>נכנסים למעגל</span><span aria-hidden="true">◀</span></button>
-      <div class="home-links"><button id="moves-button">מדריך לתרגילים</button><span class="divider">/</span><button id="profile-button">פרופיל השחקן</button><span class="divider">/</span><button id="journey-button">המסלול שלך</button></div>
-      <div class="home-links"><button id="free-button">מעגל חופשי</button><span class="divider">/</span><button id="phone-button">נוחות בטלפון</button></div><small class="version-note">שלב ראשון · גרסה ניסיונית</small>
+    <div class="home-shell">
+
+      <header class="player-card">
+        <div class="avatar-chip"><img id="home-avatar" alt="" hidden><span id="home-initials">☺</span></div>
+        <div class="player-meta">
+          <strong id="home-name">השחקן שלי</strong>
+          <div class="xp-row">
+            <span class="level-chip" id="home-level">שלב 01</span>
+            <div class="xp-track"><i id="home-xp"></i></div>
+            <span class="xp-value" id="home-xp-value">0%</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="home-cta">
+        <button id="play-button" class="primary cta">צא לחוף</button>
+        <p class="cta-sub">מצא מעגל, הצטרף ושחק</p>
+        <div class="cta-secondary">
+          <button id="free-button" class="chip">מעגל חופשי</button>
+          <button id="moves-button" class="chip">מדריך לתרגילים</button>
+        </div>
+      </div>
+
+      <div class="home-cards">
+        <div class="mini-card"><span>שלב</span><strong id="card-level">01</strong><small>היום הראשון בחוף</small></div>
+        <div class="mini-card"><span>שיא ניקוד</span><strong id="card-score">0</strong><small id="card-progress">0/350 ליעד</small></div>
+        <div class="mini-card"><span>היעד הבא</span><strong>350</strong><small>נק׳ + 2 סיומים</small></div>
+        <div class="mini-card"><span>מעגל אחרון</span><strong id="card-circle">—</strong><small id="card-circle-note">עוד לא שיחקת</small></div>
+      </div>
+
+      <nav class="home-nav" aria-label="ניווט ראשי">
+        <button id="home-tab" class="nav-item active" aria-current="page"><i aria-hidden="true">⌂</i><span>בית</span></button>
+        <button id="profile-button" class="nav-item"><i aria-hidden="true">☺</i><span>פרופיל</span></button>
+        <button id="journey-button" class="nav-item"><i aria-hidden="true">⌁</i><span>המסלול שלי</span></button>
+        <button id="achievements-button" class="nav-item"><i aria-hidden="true">✦</i><span>הישגים</span></button>
+        <button id="phone-button" class="nav-item"><i aria-hidden="true">⚙</i><span>הגדרות</span></button>
+      </nav>
+
     </div>
-    <div class="home-caption"><span>PLAYA / 01</span><strong>פשוט אל תפיל.</strong></div>
     <div id="load-state" class="load-state" role="status">מכינים את החוף…</div>
   </main>
 
@@ -62,6 +95,11 @@
       <strong id="practice-name"></strong><p id="practice-instruction"></p><small id="practice-tip"></small>
       <div class="lesson-actions"><button id="lesson-toggle" class="primary">עכשיו תורי</button><button id="lesson-next" class="secondary" hidden>לתרגיל הבא</button></div>
     </div>
+    <div id="roam-hint" class="roam-hint">גרור לתנועה · התקרב למעגל כדי לראות מי משחק</div>
+    <div id="circle-invite" class="circle-invite" hidden role="group" aria-labelledby="circle-name">
+      <div class="invite-copy"><strong id="circle-name"></strong><p id="circle-desc"></p></div>
+      <button id="circle-join" class="primary">הצטרף למעגל</button>
+    </div>
     <div class="bottom-ui">
       <div id="touch-coach" class="touch-coach">נגיעה למסירה · החזק להנחתה</div>
       <div class="jump-contact">
@@ -83,6 +121,7 @@
     <button id="landscape-button" class="primary">מסך מלא לרוחב</button>
     <p id="rotate-help">אם המסך לא מסתובב, בטל את נעילת הסיבוב במכשיר.</p><button id="rotate-home" class="secondary">חזרה לתפריט</button></div>
   </div>
+  <div id="veil" class="veil" hidden aria-hidden="true"></div>
   <div id="countdown" class="countdown" hidden aria-live="polite"></div>
   <dialog id="panel" aria-labelledby="panel-title"><button id="panel-close" class="close-button" aria-label="סגירה">×</button><div id="panel-content"></div></dialog>
   <input id="song-file" type="file" accept="audio/*" hidden>

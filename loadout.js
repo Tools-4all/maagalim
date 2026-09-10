@@ -6,8 +6,60 @@ export function normalizeProfile(value){
  for(const [key,group] of Object.entries(GROUPS))profile.slots[key]=Array.isArray(value?.slots?.[key])?[...new Set(value.slots[key].filter(x=>group.moves.includes(x)))].slice(0,3):[...DEFAULT_PROFILE.slots[key]];
  return profile;
 }
-export function readProfile(storage){try{return normalizeProfile(JSON.parse(storage.getItem('atlanta-loadout-v1')));}catch{return normalizeProfile(null);}}
-export function writeProfile(storage,profile){try{storage.setItem('atlanta-loadout-v1',JSON.stringify(normalizeProfile(profile)));return true;}catch{return false;}}
+// —— התמדת הפרופיל ——
+// כל הקריאה והכתיבה עוברות דרך כאן. הרשומה השמורה מחולקת לקטגוריות
+// (appearance / clothing / ball) כדי שיהיה אפשר להעביר אותה לשרת בהמשך
+// בלי לגעת בשאר הקוד. הפורמט הישן נקרא ומומר אוטומטית בשמירה הראשונה.
+const STORAGE_KEY='atlanta-profile-v1';
+const LEGACY_KEY='atlanta-loadout-v1';
+export const PROFILE_VERSION=1;
+
+function readRecord(storage){
+ if(!storage)return null;
+ try{
+  const current=storage.getItem(STORAGE_KEY);
+  if(current)return JSON.parse(current);
+  const legacy=storage.getItem(LEGACY_KEY);
+  if(legacy)return JSON.parse(legacy);
+ }catch{/* אחסון חסום או JSON פגום — מתייחסים כאילו אין פרופיל */}
+ return null;
+}
+// רשומה שמורה -> הצורה השטוחה שהמשחק והאווטאר עובדים איתה
+function fromRecord(record){
+ if(!record||typeof record!=='object')return null;
+ if(record.version>=1&&record.appearance)return normalizeProfile({
+  name:record.playerName,nickname:record.nickname,
+  style:record.appearance.style,skin:record.appearance.skin,
+  outfit:record.clothing?.outfit,outfitColor:record.clothing?.color,
+  ball:record.ball,slots:record.slots});
+ return normalizeProfile(record);          // הפורמט הישן
+}
+// הצורה השטוחה -> הרשומה השמורה. createdAt נשמר מהרשומה הקודמת.
+function toRecord(profile,previous){
+ const now=new Date().toISOString();
+ return {
+  version:PROFILE_VERSION,
+  playerName:profile.name,
+  nickname:profile.nickname,
+  appearance:{style:profile.style,skin:profile.skin},
+  clothing:{outfit:profile.outfit,color:profile.outfitColor},
+  ball:profile.ball,
+  slots:profile.slots,
+  createdAt:previous?.createdAt||now,
+  updatedAt:now
+ };
+}
+// האם כבר קיים פרופיל שמור — זה מה שמבדיל שחקן חוזר משחקן חדש
+export function hasProfile(storage){return !!readRecord(storage);}
+export function readProfile(storage){return fromRecord(readRecord(storage))||normalizeProfile(null);}
+export function writeProfile(storage,profile){
+ if(!storage)return false;
+ try{
+  const previous=readRecord(storage);
+  storage.setItem(STORAGE_KEY,JSON.stringify(toRecord(normalizeProfile(profile),previous)));
+  return true;
+ }catch{return false;}
+}
 export function heightGroup(game){const y=game.ball.position.y-game.player.jumpY;return y<.84?'low':y<1.60?'middle':'high';}
 export function quickChoices(game,profile){
  const now=availableTricks(game),group=game.guided?Object.keys(GROUPS).find(k=>GROUPS[k].moves.includes(game.practiceMove))||'low':game.quickGroup||'low';

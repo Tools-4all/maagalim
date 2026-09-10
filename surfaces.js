@@ -1,7 +1,7 @@
 import * as T from './vendor/three.module.js';
 // Analytic wave normals keep reflections stable without another render pass.
 export function createOcean(){
- const mat=new T.ShaderMaterial({uniforms:{time:{value:0}},vertexShader:`
+ const mat=new T.ShaderMaterial({uniforms:{time:{value:0},horizon:{value:new T.Color(0x7ba4c6)}},vertexShader:`
   uniform float time;varying vec3 vWorld;varying vec2 vSea;
   void main(){
    vec3 p=position;vSea=p.xy;
@@ -9,28 +9,35 @@ export function createOcean(){
    vWorld=(modelMatrix*vec4(p,1.)).xyz;
    gl_Position=projectionMatrix*viewMatrix*vec4(vWorld,1.);
   }`,fragmentShader:`
-  uniform float time;varying vec3 vWorld;varying vec2 vSea;
+  uniform float time;uniform vec3 horizon;varying vec3 vWorld;varying vec2 vSea;
   void main(){
-   float x=vSea.x,y=vSea.y;
+   float x=vSea.x,y=vSea.y,shore=y+95.;
    float dx=cos(x*.41+y*.27-time*1.55)*.0246+cos(x*2.1+y*1.1-time*2.2)*.027;
    float dy=cos(y*.62-time*1.2)*.0744+cos(x*.41+y*.27-time*1.55)*.0162+cos(x*2.1+y*1.1-time*2.2)*.016;
-   vec3 n=normalize(vec3(-dx,1.,dy)),v=normalize(cameraPosition-vWorld),sun=normalize(vec3(-.48,.76,.44));
+   vec3 n=normalize(vec3(-dx,1.,dy)),v=normalize(cameraPosition-vWorld),sun=normalize(vec3(-.582,.694,.425));
    float fresnel=.035+.72*pow(1.-max(dot(n,v),0.),4.);
-   float depth=smoothstep(0.,70.,95.-y);
-   vec3 water=mix(vec3(.026,.32,.27),vec3(.009,.115,.20),depth);
+   float depth=smoothstep(0.,115.,shore);
+   vec3 shallow=vec3(.075,.53,.5),midSea=vec3(.02,.235,.34),deep=vec3(.006,.085,.175);
+   vec3 water=depth<.5?mix(shallow,midSea,smoothstep(0.,.5,depth)):mix(midSea,deep,smoothstep(.5,1.,depth));
    vec3 reflected=mix(vec3(.29,.48,.61),vec3(.075,.26,.45),max(reflect(-v,n).y,0.));
    vec3 col=mix(water,reflected,fresnel);
    col+=vec3(1.,.89,.66)*pow(max(dot(n,normalize(v+sun)),0.),150.)*.8;
-   float shore=95.-y;
-   float crest=sin(shore*2.3+sin(x*.32)*.48-time*1.35);
+   vec3 ripple=normalize(vec3(-cos(x*5.7+y*3.1-time*3.1)*.05-cos(x*11.3-y*6.2-time*4.4)*.03,1.,cos(y*5.1-x*2.7-time*2.7)*.05));
+   float glint=pow(max(dot(normalize(n*.55+ripple*.45),normalize(v+sun)),0.),420.);
+   col+=vec3(1.,.94,.78)*glint*1.35*smoothstep(6.,26.,shore);
+   float bed=1.-smoothstep(0.,11.,shore);
+   col=mix(col,mix(col,vec3(.6,.515,.375),.6),bed*bed);
+   float crest=sin(shore*2.3+sin(x*.32)*.48+time*1.35);
    float foam=pow(max(crest,0.),7.)*(1.-smoothstep(.3,7.,shore));
    float lace=.55+.45*sin(x*9.+sin(y*7.)*2.)*sin(y*11.+x*4.);
    col=mix(col,vec3(.83,.89,.83),foam*(.6+lace*.3));
+   float haze=smoothstep(72.,196.,length(cameraPosition-vWorld));
+   col=mix(col,horizon,haze*.86);
    gl_FragColor=vec4(col,1.);
    #include <tonemapping_fragment>
    #include <colorspace_fragment>
   }`});
- const sea=new T.Mesh(new T.PlaneGeometry(280,190,100,90),mat);sea.rotation.x=-Math.PI/2;sea.position.set(0,-.025,-105);return sea;
+ const sea=new T.Mesh(new T.PlaneGeometry(480,190,120,90),mat);sea.rotation.x=-Math.PI/2;sea.position.set(0,-.025,-105);return sea;
 }
 // Eighteen curved panels follow the sphere, with fine seams and surface grain.
 export function volleyballMaterial(look='classic'){
